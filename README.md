@@ -10,7 +10,7 @@ cargo run
 
 ## Usage
 
-Need to have to ENV variables, your binary.com `token` and `app_id`
+Need to have ENV variables setup in your environment, your binary.com `token` and `app_id`
 
 ```bash
 export BINARY_TOKEN=XXXXXXXX
