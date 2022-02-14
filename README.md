@@ -17,6 +17,8 @@ export BINARY_TOKEN=XXXXXXXX
 export BINARY_APP=XXXXX
 ```
 
+To exit a trading session you must hit `CTRL` + `C` to end the program.
+
 ## Screenshots
 
 Example of a trading session
