@@ -56,16 +56,45 @@ fn main() {
                  .long("app")
                  .takes_value(true)
                  .help("App ID value"))
+        .arg(Arg::new("duration")
+                 .short('d')
+                 .long("duration")
+                 .takes_value(true)
+                 .help("Trade duration in ticks"))
+        .arg(Arg::new("amount")
+                 .short('m')
+                 .long("amount")
+                 .takes_value(true)
+                 .help("Trade amount"))
+        .arg(Arg::new("profit")
+                 .short('p')
+                 .long("profit")
+                 .takes_value(true)
+                 .help("Wanted profit"))
+        .arg(Arg::new("stop")
+                 .short('s')
+                 .long("stop")
+                 .takes_value(true)
+                 .help("Consecutive loss to stop trading"))
+        .arg(Arg::new("contract")
+                 .short('c')
+                 .long("contract")
+                 .takes_value(true)
+                 .help("Contract type to trade DIGITEVEN, DIGITODD or BOTH"))
         .get_matches();
 
   let token = matches.value_of("token").unwrap_or("");
   let app = matches.value_of("app").unwrap_or("");
+  let duration = matches.value_of("duration").unwrap_or("").parse::<i32>().unwrap();
+  let trade_amount = matches.value_of("amount").unwrap_or("").parse::<i32>().unwrap();
+  let take_profit = matches.value_of("profit").unwrap_or("").parse::<i32>().unwrap();
+  let stop_loss = matches.value_of("stop").unwrap_or("").parse::<i32>().unwrap();
+  let contract_option = matches.value_of("contract").unwrap_or("").to_uppercase();
 
   let ws_url = format!("wss://ws.binaryws.com/websockets/v3?app_id={}",app);
 
   let mut data_table = vec![];
 
-  let trade_amount : i32 = 1;
   let mut balance : String;
   let mut contract_id : String;
   let mut entry_tick_value : String;
@@ -75,8 +104,20 @@ fn main() {
   let mut buy_price : String;
   let mut profit : String;
 
+  let mut consecutive_loses : i32 = 0;
   let mut track_profit : f32 = 0.0;
   let mut martingale : i32 = 0;
+  let mut contract_type : String;
+
+  if contract_option == "BOTH"{
+    contract_type = "DIGITEVEN".to_string();
+  }
+  else if contract_option == "DIGITEVEN"{
+    contract_type = "DIGITEVEN".to_string();
+  }
+  else{
+    contract_type = "DIGITODD".to_string();
+  }
 
   // Initializes contract_id and makes sure that martingale is used to prevent compiler warnings.
   contract_id = martingale.to_string();
@@ -97,9 +138,9 @@ fn main() {
     "parameters": { 
       "amount": trade_amount, 
       "basis": "stake", 
-      "contract_type": "DIGITEVEN", 
+      "contract_type": contract_type, 
       "currency": "USD", 
-      "duration": 1, 
+      "duration": duration, 
       "duration_unit": "t", 
       "symbol": "R_100" }
   });
@@ -153,7 +194,7 @@ fn main() {
 
         data_table.push(Contract{
           contract_id: contract_id.to_owned(),
-          contract_type: "DIGITEVEN".to_string(),
+          contract_type: contract_type.to_string(),
           entry_price: entry_tick_value.replace("\"", ""),
           exit_price: exit_tick_value.replace("\"", ""),
           entry_time: entry_tick_time,
@@ -174,12 +215,37 @@ fn main() {
         println!("Balance {}",balance);
 
         if response["proposal_open_contract"]["status"] == "lost"{
+          // Track consecutive loses
+          consecutive_loses = consecutive_loses + 1;
+          if consecutive_loses == stop_loss{
+            println!("Stop loss reached at {}",consecutive_loses.to_string().red());
+            break;
+          }
+
           // Apply Martingale
           martingale = martingale * 2;
+
+          // Check Contract type
+          if contract_option == "BOTH"{
+            if contract_type == "DIGITEVEN"{
+              contract_type = "DIGITODD".to_string();
+            }
+            else{
+              contract_type = "DIGITEVEN".to_string();
+            }
+          }
         }
         if response["proposal_open_contract"]["status"] == "won"{
+          // Reset Consecutive loses
+          consecutive_loses = 0;
           // Reset Martingale
           martingale = trade_amount;
+
+          // Check if Profit goal was met
+          if track_profit >= (take_profit as f32){
+            println!("Profit goal reached at {}",track_profit.to_string().green());
+            break;
+          }
         }
 
         // Buys Contract
@@ -190,7 +256,7 @@ fn main() {
           "parameters": { 
             "amount": martingale, 
             "basis": "stake", 
-            "contract_type": "DIGITEVEN", 
+            "contract_type": contract_type, 
             "currency": "USD", 
             "duration": 1, 
             "duration_unit": "t", 
