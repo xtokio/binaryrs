@@ -4,17 +4,9 @@ Trading bot for Binary.com done in Rust
 
 ## Run
 
+You need to obtain your `token` and `app` values from your account over at binary.com
 ```bash
-cargo run
-```
-
-## Usage
-
-Need to have ENV variables setup in your environment, your binary.com `token` and `app_id`
-
-```bash
-export BINARY_TOKEN=XXXXXXXX
-export BINARY_APP=XXXXX
+cargo run -- --token=XXXXXXXX --app=XXXXX
 ```
 
 To exit a trading session you must hit `CTRL` + `C` to end the program.
