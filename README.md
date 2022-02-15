@@ -10,9 +10,13 @@ cargo run -- --token=XXXXXXXX --app=XXXXX --duration=1 --amount=1 --profit=10 --
 ```
 `Options`
 `--duration=1` That is the number of ticks to wait between trades
+
 `--amount=1`   Amount of dollars on each trade
+
 `--profit=10`  Profit to take and close the trading session
+
 `--stop=4`     Stop loss, trading session will end at the specified consecutive loss
+
 `--contract=digiteven` Type of contract to trade `digiteven`, `digitodd` and `both` ( `both` will alternate between `digiteven` and `digitodd`)
 
 To exit a trading session you must hit `CTRL` + `C` to end the program.
