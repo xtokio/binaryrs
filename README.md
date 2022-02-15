@@ -6,8 +6,14 @@ Trading bot for Binary.com done in Rust
 
 You need to obtain your `token` and `app` values from your account over at binary.com
 ```bash
-cargo run -- --token=XXXXXXXX --app=XXXXX
+cargo run -- --token=XXXXXXXX --app=XXXXX --duration=1 --amount=1 --profit=10 --stop=4 --contract=digiteven
 ```
+`Options`
+`--duration=1` That is the number of ticks to wait between trades
+`--amount=1`   Amount of dollars on each trade
+`--profit=10`  Profit to take and close the trading session
+`--stop=4`     Stop loss, trading session will end at the specified consecutive loss
+`--contract=digiteven` Type of contract to trade `digiteven`, `digitodd` and `both` ( `both` will alternate between `digiteven` and `digitodd`)
 
 To exit a trading session you must hit `CTRL` + `C` to end the program.
 
