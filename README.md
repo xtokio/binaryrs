@@ -9,6 +9,7 @@ You need to obtain your `token` and `app` values from your account over at binar
 cargo run -- --token=XXXXXXXX --app=XXXXX --duration=1 --amount=1 --profit=10 --stop=4 --contract=digiteven
 ```
 `Options`
+
 `--duration=1` That is the number of ticks to wait between trades
 
 `--amount=1`   Amount of dollars on each trade
