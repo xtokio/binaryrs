@@ -1,9 +1,9 @@
+use clap::{Arg, App};
 use tungstenite::{connect, Message};
 use url::Url;
 use serde_json;
-use tabled::{Tabled, Table, Style, Modify, Column, Format};
+use tabled::{Tabled, Table, Style};
 use colored::*;
-use std::env;
 
 use chrono::prelude::DateTime;
 use chrono::Local;
@@ -25,9 +25,7 @@ fn render_table(data: &Vec<Contract>){
   // Clears screen
   print!("{esc}c", esc = 27 as char);
 
-  let table = Table::new(data)
-    .with(Style::modern())
-    .with(Modify::new(Column(7..8)).with(Format(|s| s.to_string())));
+  let table = Table::new(data).with(Style::modern());
   println!("{}",table);
 }
 
@@ -43,11 +41,29 @@ fn format_date(unix_epoch: u64) -> String{
 }
 
 fn main() {
-  let mut data_table = vec![];
+  // Get parameters from command line
+  let matches = App::new("Binaryrs")
+        .version("0.1.0")
+        .author("Luis Gomez <xtokio@gmail.com>")
+        .about("Simple trading bot for binary.com")
+        .arg(Arg::new("token")
+                 .short('t')
+                 .long("token")
+                 .takes_value(true)
+                 .help("Token value"))
+        .arg(Arg::new("app")
+                 .short('a')
+                 .long("app")
+                 .takes_value(true)
+                 .help("App ID value"))
+        .get_matches();
 
-  let app = env::var("BINARY_APP").unwrap_or("none".to_string());
-  let token = env::var("BINARY_TOKEN").unwrap_or("none".to_string());
+  let token = matches.value_of("token").unwrap_or("");
+  let app = matches.value_of("app").unwrap_or("");
+
   let ws_url = format!("wss://ws.binaryws.com/websockets/v3?app_id={}",app);
+
+  let mut data_table = vec![];
 
   let trade_amount : i32 = 1;
   let mut balance : String;
